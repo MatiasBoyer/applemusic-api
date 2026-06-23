@@ -65,7 +65,12 @@ export class TokenStorage {
 		const jsRes = await this.ax.get(baseJSUrl);
 		this.logger.debug("yoinkToken: asset length", jsRes.data.length);
 		const js = jsRes.data as string;
-		const tokenMatch = js.match(/(eyJhbGc.+?)"/);
+		/*
+		 Sometimes apple likes to change this, for some reason - so, to find it if it for some reason change again
+		 go look at the (usually) the first script it fetches when loading the website
+		 then search for "eyJ" - or "media-user-token" / "getJwt" and you should be able to find it and update this function :3
+		 */
+		const tokenMatch = js.match(/(eyJ.+?)"/);
 		if (!tokenMatch) {
 			this.logger.error("yoinkToken: failed to locate token in asset");
 			return {
