@@ -3,10 +3,45 @@
  *
  * @module Utilities/AxiosManager
  */
-import axios, { type AxiosInstance } from "axios";
+import axios, {
+	type AxiosError,
+	type AxiosInstance,
+	type InternalAxiosRequestConfig,
+} from "axios";
 import { Cookie, CookieJar } from "tough-cookie";
 import { AppleMusicConfig } from "./Config";
 import { TokenStorage } from "./TokenStorage";
+
+type RetryableRequest = InternalAxiosRequestConfig & {
+	retryCount?: number;
+	authRetried?: boolean;
+};
+
+const MAX_RETRY_DELAY_MS = 30_000;
+
+const wait = (ms: number): Promise<void> =>
+	new Promise((resolve) => setTimeout(resolve, ms));
+
+/** @internal */
+const isRetryable = (error: AxiosError): boolean => {
+	const status = error.response?.status;
+	if (status === undefined) return axios.isAxiosError(error);
+	return status === 429 || status >= 500;
+};
+
+/** @internal */
+const retryDelayMs = (
+	error: AxiosError,
+	attempt: number,
+	baseDelayMs: number,
+): number => {
+	const retryAfter = Number(error.response?.headers?.["retry-after"]);
+	const delay =
+		Number.isFinite(retryAfter) && retryAfter > 0
+			? retryAfter * 1000
+			: baseDelayMs * 2 ** attempt;
+	return Math.min(delay, MAX_RETRY_DELAY_MS);
+};
 
 /**
  * Internal coordinator that authenticates requests against Apple Music services.
@@ -75,16 +110,36 @@ class AxiosManager {
 
 	/** @internal */
 	private addAuthInterceptor(): void {
-		this.apiAxios?.interceptors.request.use(async (req) => {
+		const client = this.apiAxios;
+		client?.interceptors.request.use(async (req) => {
 			// Only add auth for API requests to amp-api, not for token fetching on music.apple.com
 			if (req.url?.includes("amp-api")) {
-				let token = this.tokenStorage.currentToken;
-				if (!token) {
-					token = await this.tokenStorage.getToken();
-				}
+				// Endpoints keep this client for the life of the process, so the token
+				// has to be checked here. getToken() returns the cached one while valid.
+				const token = await this.tokenStorage.getToken();
 				req.headers.Authorization = `Bearer ${token}`;
+				if (this.config.userToken) {
+					req.headers[this.config.userTokenHeader] = this.config.userToken;
+				}
 			}
 			return req;
+		});
+		client?.interceptors.response.use(undefined, async (error: AxiosError) => {
+			const req = error.config as RetryableRequest | undefined;
+			if (!req) throw error;
+
+			if (error.response?.status === 401 && !req.authRetried) {
+				req.authRetried = true;
+				this.tokenStorage.invalidate();
+				return client.request(req);
+			}
+
+			const attempt = req.retryCount ?? 0;
+			if (!isRetryable(error) || attempt >= this.config.maxRetries) throw error;
+
+			req.retryCount = attempt + 1;
+			await wait(retryDelayMs(error, attempt, this.config.retryBaseDelayMs));
+			return client.request(req);
 		});
 	}
 

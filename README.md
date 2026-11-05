@@ -2,6 +2,8 @@
 
 Typed helpers around Apple Music catalog endpoints with shared configuration, logging, and token management. The client is still in active development, so expect method signatures to move as we close gaps.
 
+> Fork for [musicsync](https://github.com/m-boyer/musicsync). It adds the user library endpoint (read every song, add and remove), token renewal on every request and retries. Install it with `npm install github:MatiasBoyer/applemusic-api#v0.1.0`.
+
 ## Features
 
 - Zero configuration authentication with automatic scraping and validation of session tokens

@@ -6,6 +6,7 @@
  */
 export enum Region {
 	US = "us",
+	AR = "ar",
 	GB = "gb",
 	FR = "fr",
 	DE = "de",

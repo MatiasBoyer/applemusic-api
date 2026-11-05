@@ -7,12 +7,13 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.0.6",
+  "version": "0.1.0",
   "author": "xwxfox",
   "license": "MIT",
   "description": "Unofficial Apple Music API client with typed helpers around their endpoints with shared configuration, logging, and token management.",
   "scripts": {
-    "build": "rm -rf ./dist && tsc --build --verbose --diagnostics && tsc-alias",
+    "prepare": "npm run build",
+    "build": "rm -rf ./dist && tsc --build && tsc-alias",
     "build:all": "bun run build && bun run docs:build",
     "test": "vitest run --coverage",
     "dtest": "bun run src/example.ts",
@@ -40,10 +41,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sync-fm/applemusic-api.git"
+    "url": "git+https://github.com/MatiasBoyer/applemusic-api.git"
   },
   "bugs": {
-    "url": "https://github.com/sync-fm/applemusic-api/issues"
+    "url": "https://github.com/MatiasBoyer/applemusic-api/issues"
   },
   "homepage": "https://am-docs.syncfm.dev/",
   "keywords": [
@@ -66,8 +67,5 @@
     "tsc-alias": "^1.8.16",
     "typescript": "^5.9.3",
     "vitest": "^3.2.4"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
   }
 }

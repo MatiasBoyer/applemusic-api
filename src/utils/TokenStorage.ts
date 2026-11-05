@@ -154,6 +154,11 @@ export class TokenStorage {
 		return this.token;
 	}
 
+	/** Forces the next {@link TokenStorage.getToken} call to fetch a new token. */
+	public invalidate(): void {
+		this.isTokenValid = false;
+	}
+
 	public get valid(): boolean {
 		return this.isTokenValid;
 	}

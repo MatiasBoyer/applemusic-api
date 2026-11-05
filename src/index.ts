@@ -8,6 +8,12 @@ export { AppleMusic } from "./AppleMusic";
 export { AlbumsEndpoint, AlbumsEndpointTypes } from "./endpoints/Albums";
 export { ArtistsEndpoint, ArtistsEndpointTypes } from "./endpoints/Artists";
 export { HintsEndpoint, HintsEndpointTypes } from "./endpoints/Hints";
+export type {
+	LibraryPage,
+	LibrarySong,
+	LibrarySongsResult,
+} from "./endpoints/Library";
+export { LibraryEndpoint } from "./endpoints/Library";
 export {
 	MusicVideosEndpoint,
 	MusicVideosEndpointTypes,
@@ -20,6 +26,6 @@ export {
 } from "./endpoints/Suggestions";
 export { Region, ResourceType } from "./types/SharedSearchParams";
 export { getAuthenticatedAxios } from "./utils/AxiosManager";
-export type { AppleMusicConfigParams } from "./utils/Config";
+export type { AppleMusicConfigParams, UserTokenHeader } from "./utils/Config";
 export { AppleMusicConfig, AuthType } from "./utils/Config";
 export { DestinationName, Logger, LogLevel } from "./utils/Logger";

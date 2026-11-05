@@ -2,6 +2,7 @@ import type { AxiosInstance } from "axios";
 import { AlbumsEndpoint } from "./endpoints/Albums";
 import { ArtistsEndpoint } from "./endpoints/Artists";
 import { HintsEndpoint } from "./endpoints/Hints";
+import { LibraryEndpoint } from "./endpoints/Library";
 import { MusicVideosEndpoint } from "./endpoints/MusicVideos";
 import { SearchEndpoint } from "./endpoints/Search";
 import { SongsEndpoint } from "./endpoints/Songs";
@@ -76,6 +77,12 @@ export class AppleMusic {
 	public readonly MusicVideos!: MusicVideosEndpoint;
 
 	/**
+	 * Library endpoint for reading and changing the user's songs. Requires a user token.
+	 * @group Endpoints
+	 */
+	public readonly Library!: LibraryEndpoint;
+
+	/**
 	 * Structured logger propagated to every endpoint.
 	 */
 	public get log(): Logger {
@@ -122,6 +129,7 @@ export class AppleMusic {
 		this.Songs = createUninitializedProxy<SongsEndpoint>();
 		this.Artists = createUninitializedProxy<ArtistsEndpoint>();
 		this.MusicVideos = createUninitializedProxy<MusicVideosEndpoint>();
+		this.Library = createUninitializedProxy<LibraryEndpoint>();
 	}
 
 	/** @internal */
@@ -178,6 +186,11 @@ export class AppleMusic {
 		this.MusicVideos = new MusicVideosEndpoint(this.config);
 		await this.MusicVideos.init();
 		this.log.debug("Music Videos endpoint ready");
+
+		// @ts-expect-error - We're initializing readonly properties
+		this.Library = new LibraryEndpoint(this.config);
+		await this.Library.init();
+		this.log.debug("Library endpoint ready");
 
 		this.initialized = true;
 		this.log.debug("Apple Music API initialized :333");

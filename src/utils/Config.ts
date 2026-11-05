@@ -29,6 +29,12 @@ const BaseURLs: Record<AuthType, string> = {
 };
 
 /**
+ * Headers Apple Music accepts for a user token.
+ * @category Configuration
+ */
+export type UserTokenHeader = "Music-User-Token" | "media-user-token";
+
+/**
  * Parameters accepted by {@link AppleMusicConfig}.
  * @category Configuration
  */
@@ -37,6 +43,16 @@ export type AppleMusicConfigParams = {
 	authType?: AuthType;
 	logger?: Logger;
 	loggerOptions?: LoggerOptions;
+	/** Apple Music user token, required by the Library endpoint. */
+	userToken?: string;
+	/** Header used to send {@link AppleMusicConfigParams.userToken}. */
+	userTokenHeader?: UserTokenHeader;
+	/** Overrides the API host for the selected {@link AuthType}. */
+	baseURL?: string;
+	/** Retries for rate limited or failed requests. Defaults to 3. */
+	maxRetries?: number;
+	/** First retry delay in milliseconds, doubled on each retry. Defaults to 1000. */
+	retryBaseDelayMs?: number;
 };
 
 /**
@@ -48,11 +64,23 @@ export class AppleMusicConfig {
 	public authType: AuthType = AuthType.Scraped;
 	public logger: Logger;
 	public loggerOptions?: LoggerOptions;
+	public userToken?: string;
+	public userTokenHeader: UserTokenHeader = "Music-User-Token";
+	public baseURL?: string;
+	public maxRetries = 3;
+	public retryBaseDelayMs = 1000;
 
 	constructor(config?: AppleMusicConfigParams) {
 		if (config?.region) this.region = config.region;
 		if (config?.authType) this.authType = config.authType;
 		if (config?.loggerOptions) this.loggerOptions = config.loggerOptions;
+		if (config?.userToken) this.userToken = config.userToken;
+		if (config?.userTokenHeader) this.userTokenHeader = config.userTokenHeader;
+		if (config?.baseURL) this.baseURL = config.baseURL;
+		if (config?.maxRetries !== undefined) this.maxRetries = config.maxRetries;
+		if (config?.retryBaseDelayMs !== undefined) {
+			this.retryBaseDelayMs = config.retryBaseDelayMs;
+		}
 		if (config?.logger) {
 			this.logger = config.logger;
 		} else {
@@ -76,8 +104,12 @@ export class AppleMusicConfig {
 		this.logger = logger;
 	}
 
+	public setUserToken(token: string): void {
+		this.userToken = token;
+	}
+
 	public getBaseURL(): string {
-		return BaseURLs[this.authType];
+		return this.baseURL ?? BaseURLs[this.authType];
 	}
 
 	public getBaseURLForAuthType(authType: AuthType): string {
