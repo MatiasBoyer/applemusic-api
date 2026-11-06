@@ -9,11 +9,17 @@ export { AlbumsEndpoint, AlbumsEndpointTypes } from "./endpoints/Albums";
 export { ArtistsEndpoint, ArtistsEndpointTypes } from "./endpoints/Artists";
 export { HintsEndpoint, HintsEndpointTypes } from "./endpoints/Hints";
 export type {
+	AllPagesResult,
 	LibraryPage,
+	LibraryPlaylist,
 	LibrarySong,
 	LibrarySongsResult,
+	PlaylistRemoveStrategy,
 } from "./endpoints/Library";
-export { LibraryEndpoint } from "./endpoints/Library";
+export {
+	LibraryEndpoint,
+	PLAYLIST_REMOVE_STRATEGIES,
+} from "./endpoints/Library";
 export {
 	MusicVideosEndpoint,
 	MusicVideosEndpointTypes,
